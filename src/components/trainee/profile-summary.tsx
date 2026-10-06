@@ -1,9 +1,15 @@
 import type { Group, TraineeProfile } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type ProfileWithGroup = TraineeProfile & { group: Group | null };
+type ProfileWithGroup = TraineeProfile & {
+  group: Group | null;
+  user: { fullName: string; phone: string | null };
+};
 
 const FIELDS: { key: keyof TraineeProfile; label: string }[] = [
+  { key: "lastName", label: "שם משפחה" },
+  { key: "parentName", label: "שם ההורה" },
+  { key: "parentPhone", label: "טלפון ההורה" },
   { key: "school", label: "בית ספר" },
   { key: "grade", label: "כיתה" },
   { key: "bio", label: "קצת עליי" },
@@ -30,6 +36,16 @@ export function ProfileSummary({
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {profile.user.phone ? (
+            <div>
+              <dt className="text-xs font-semibold text-muted-foreground">
+                טלפון החניך
+              </dt>
+              <dd className="text-sm text-foreground" dir="ltr">
+                {profile.user.phone}
+              </dd>
+            </div>
+          ) : null}
           {FIELDS.map(({ key, label }) => {
             const value = profile[key];
             if (!value) return null;

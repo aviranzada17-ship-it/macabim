@@ -18,6 +18,7 @@ export default async function TraineeDashboardPage() {
     where: { userId: session.userId },
     include: {
       group: true,
+      user: true,
       metricEntries: { orderBy: { recordedAt: "asc" } },
       goals: { where: { status: "ACTIVE" } },
       reflections: { orderBy: { sessionDate: "desc" }, take: 8 },
