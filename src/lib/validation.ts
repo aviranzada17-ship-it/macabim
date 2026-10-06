@@ -15,6 +15,23 @@ export const changePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, "יש להזין שם מלא"),
+    username: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(3, "שם משתמש חייב להכיל לפחות 3 תווים")
+      .regex(/^[a-z0-9_.]+$/, "שם משתמש יכול להכיל רק אותיות אנגליות, מספרים, נקודה וקו תחתון"),
+    password: z.string().min(6, "הסיסמה חייבת להכיל לפחות 6 תווים"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "הסיסמאות אינן תואמות",
+    path: ["confirmPassword"],
+  });
+
 export const onboardingSchema = z.object({
   phone: z.string().trim().min(9, "מספר טלפון לא תקין"),
   parentName: z.string().trim().min(1, "שדה חובה"),

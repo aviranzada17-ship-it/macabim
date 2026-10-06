@@ -12,6 +12,7 @@ import {
   ResetPasswordButton,
   ToggleActiveButton,
   AssignGroupSelect,
+  DeleteTraineeButton,
 } from "@/components/admin/trainee-controls";
 
 export default async function TraineeDetailPage({
@@ -75,6 +76,10 @@ export default async function TraineeDetailPage({
             <ToggleActiveButton
               traineeUserId={profile.user.id}
               active={profile.user.active}
+            />
+            <DeleteTraineeButton
+              traineeUserId={profile.user.id}
+              traineeName={profile.user.fullName}
             />
           </div>
         </CardContent>

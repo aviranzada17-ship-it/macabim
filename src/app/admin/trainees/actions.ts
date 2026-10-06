@@ -113,6 +113,20 @@ export async function setTraineeActiveAction(
   revalidatePath("/admin");
 }
 
+export async function deleteTraineeAction(traineeUserId: string) {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") redirect("/login");
+
+  await prisma.$transaction([
+    prisma.metricEntry.deleteMany({ where: { enteredById: traineeUserId } }),
+    prisma.coachNote.deleteMany({ where: { authorId: traineeUserId } }),
+    prisma.user.delete({ where: { id: traineeUserId } }),
+  ]);
+
+  revalidatePath("/admin");
+  redirect("/admin");
+}
+
 export async function assignGroupAction(
   traineeProfileId: string,
   groupId: string | null,

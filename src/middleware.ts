@@ -32,6 +32,7 @@ export async function middleware(req: NextRequest) {
 
   const isPublic =
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/branding") ||
     pathname === "/favicon.ico";
@@ -45,8 +46,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // משתמש מחובר שמנסה להגיע לעמוד ההתחברות -> נעביר אותו הביתה
-  if (pathname === "/login") {
+  // משתמש מחובר שמנסה להגיע לעמוד ההתחברות או ההרשמה -> נעביר אותו הביתה
+  if (pathname === "/login" || pathname === "/register") {
     return NextResponse.redirect(new URL(homeFor(session.role), req.url));
   }
 

@@ -1,17 +1,17 @@
 "use client";
 
 import { useActionState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { loginAction, type LoginState } from "./actions";
+import Image from "next/image";
+import { registerAction, type RegisterState } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const initialState: LoginState = {};
+const initialState: RegisterState = {};
 
-export default function LoginPage() {
-  const [state, formAction, pending] = useActionState(loginAction, initialState);
+export default function RegisterPage() {
+  const [state, formAction, pending] = useActionState(registerAction, initialState);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-primary px-4 py-10">
@@ -28,25 +28,29 @@ export default function LoginPage() {
           <h1 className="text-2xl font-extrabold tracking-tight text-primary-foreground">
             המכבים
           </h1>
-          <p className="text-sm text-primary-foreground/70">
-            תוכנית הכנה לצבא ולחיים
-          </p>
+          <p className="text-sm text-primary-foreground/70">הרשמה לתוכנית</p>
         </div>
       </div>
 
       <div className="w-full max-w-sm rounded-xl border border-primary-foreground/10 bg-card p-6 shadow-xl">
         <h2 className="mb-6 text-center text-lg font-bold text-card-foreground">
-          התחברות למערכת
+          יצירת חשבון חדש
         </h2>
 
         <form action={formAction} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="username">שם משתמש</Label>
+            <Label htmlFor="fullName">שם מלא</Label>
+            <Input id="fullName" name="fullName" autoComplete="name" required autoFocus />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="username">שם משתמש (באנגלית)</Label>
             <Input
               id="username"
               name="username"
               autoComplete="username"
-              autoFocus
+              dir="ltr"
+              className="text-left"
               required
             />
           </div>
@@ -57,8 +61,21 @@ export default function LoginPage() {
               id="password"
               name="password"
               type="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
+              minLength={6}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="confirmPassword">אימות סיסמה</Label>
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={6}
             />
           </div>
 
@@ -67,18 +84,15 @@ export default function LoginPage() {
           ) : null}
 
           <Button type="submit" disabled={pending} className="mt-2 w-full">
-            {pending ? "מתחבר..." : "התחברות"}
+            {pending ? "נרשם..." : "הרשמה והמשך לשאלון"}
           </Button>
         </form>
       </div>
 
-      <p className="mt-8 text-xs text-primary-foreground/50">
-        לא זכור לך שם המשתמש או הסיסמה? פנה למאמן או למנהל התוכנית.
-      </p>
-      <p className="mt-3 text-sm text-primary-foreground/80">
-        חניך חדש?{" "}
-        <Link href="/register" className="font-semibold text-accent underline">
-          הרשמה
+      <p className="mt-8 text-sm text-primary-foreground/70">
+        כבר יש לכם חשבון?{" "}
+        <Link href="/login" className="font-semibold text-accent underline">
+          להתחברות
         </Link>
       </p>
     </div>

@@ -6,10 +6,11 @@ import {
   resetTraineePasswordAction,
   setTraineeActiveAction,
   assignGroupAction,
+  deleteTraineeAction,
 } from "@/app/admin/trainees/actions";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import { KeyRound, Ban, CheckCircle } from "lucide-react";
+import { KeyRound, Ban, CheckCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function ResetPasswordButton({ traineeUserId }: { traineeUserId: string }) {
@@ -71,6 +72,36 @@ export function ToggleActiveButton({
     >
       {isActive ? <Ban className="size-4" /> : <CheckCircle className="size-4" />}
       {pending ? "מעדכן..." : isActive ? "השבתת חניך" : "הפעלת חניך"}
+    </Button>
+  );
+}
+
+export function DeleteTraineeButton({
+  traineeUserId,
+  traineeName,
+}: {
+  traineeUserId: string;
+  traineeName: string;
+}) {
+  const [pending, startTransition] = useTransition();
+
+  function handleClick() {
+    if (
+      !window.confirm(
+        `למחוק את ${traineeName} לצמיתות? כל הנתונים שלו (מדדים, יעדים, נקודות ושאלון) יימחקו ולא ניתן לשחזר.`,
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      await deleteTraineeAction(traineeUserId);
+    });
+  }
+
+  return (
+    <Button variant="destructive" size="sm" onClick={handleClick} disabled={pending}>
+      <Trash2 className="size-4" />
+      {pending ? "מוחק..." : "מחיקת חניך"}
     </Button>
   );
 }
