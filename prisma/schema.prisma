@@ -1,0 +1,182 @@
+// Prisma schema – מערכת ניהול חניכים "המכבים"
+// תיעוד: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  COACH
+  TRAINEE
+}
+
+enum MetricUnit {
+  REPS // חזרות
+  TIME_SECONDS // זמן (בשניות)
+  DISTANCE_METERS // מרחק (במטרים)
+  FREE_NUMBER // ערך מספרי חופשי
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  ARCHIVED
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  username           String   @unique
+  passwordHash       String
+  role               Role
+  fullName           String
+  phone              String?
+  active             Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  traineeProfile   TraineeProfile?
+  enteredMetrics   MetricEntry[]    @relation("MetricEnteredBy")
+  coachNotes       CoachNote[]      @relation("CoachNoteAuthor")
+
+  @@map("users")
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  trainees TraineeProfile[]
+
+  @@map("groups")
+}
+
+model TraineeProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // פרופיל קליטה
+  lastName            String
+  parentName          String?
+  parentPhone         String?
+  school              String?
+  grade               String?
+  bio                 String?
+  enlistmentGoal      String?
+  yearImportance      String?
+  strengths           String?
+  weakness            String?
+  importantToKnow     String?
+  howFound            String?
+  investmentLevel     String?
+  onboardingCompleted Boolean @default(false)
+
+  groupId  String?
+  group    Group?  @relation(fields: [groupId], references: [id])
+  joinedAt DateTime @default(now())
+
+  metricEntries MetricEntry[]
+  goals         Goal[]
+  reflections   ReflectionEntry[]
+  coachNotes    CoachNote[]
+  aiProgram     AIProgram?
+
+  @@map("trainee_profiles")
+}
+
+model MetricDefinition {
+  id             String     @id @default(cuid())
+  name           String
+  unit           MetricUnit
+  higherIsBetter Boolean    @default(true)
+  active         Boolean    @default(true)
+  sortOrder      Int        @default(0)
+  createdAt      DateTime   @default(now())
+
+  entries MetricEntry[]
+  goals   Goal[]
+
+  @@map("metric_definitions")
+}
+
+model MetricEntry {
+  id         String   @id @default(cuid())
+  traineeId  String
+  trainee    TraineeProfile @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  metricId   String
+  metric     MetricDefinition @relation(fields: [metricId], references: [id], onDelete: Cascade)
+  value      Float
+  recordedAt DateTime @default(now())
+
+  enteredById String
+  enteredBy   User   @relation("MetricEnteredBy", fields: [enteredById], references: [id])
+
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([traineeId, metricId])
+  @@map("metric_entries")
+}
+
+model Goal {
+  id          String     @id @default(cuid())
+  traineeId   String
+  trainee     TraineeProfile @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  metricId    String
+  metric      MetricDefinition @relation(fields: [metricId], references: [id], onDelete: Cascade)
+  targetValue Float
+  targetDate  DateTime?
+  status      GoalStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+
+  @@index([traineeId, metricId])
+  @@map("goals")
+}
+
+model ReflectionEntry {
+  id           String   @id @default(cuid())
+  traineeId    String
+  trainee      TraineeProfile @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  keepPoint    String
+  improvePoint String
+  sessionDate  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([traineeId])
+  @@map("reflection_entries")
+}
+
+model CoachNote {
+  id        String   @id @default(cuid())
+  traineeId String
+  trainee   TraineeProfile @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User   @relation("CoachNoteAuthor", fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([traineeId])
+  @@map("coach_notes")
+}
+
+// Placeholder לפיצ'ר תוכנית אימון אישית מבוססת AI – ייבנה בעתיד
+model AIProgram {
+  id          String    @id @default(cuid())
+  traineeId   String    @unique
+  trainee     TraineeProfile @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  status      String    @default("coming_soon")
+  content     Json?
+  generatedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@map("ai_programs")
+}
